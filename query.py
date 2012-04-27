@@ -6,7 +6,6 @@ import xml.etree.ElementTree as etree
 
 from collections import OrderedDict
 
-
 from config import WUGROUND_KEY
 
 class GetWeather(object):
