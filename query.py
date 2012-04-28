@@ -14,12 +14,58 @@ class GetWeather(object):
         self.zip_code = zip_code
 
     @staticmethod
+    def _gen_data_dict(source, data):
+        data_dict = {
+            'source': source,
+            'data': data
+        }
+        return data_dict
+
+    @staticmethod
     def _get_response(req_url, json_resp=True):
         request = urllib.request.Request(req_url)
         req_data = urllib.request.urlopen(request)
         data = json.loads(req_data.read().decode()) \
                 if json_resp else etree.parse(req_data)
         return data
+
+    def get_google_weather(self):
+        forecast_dict = OrderedDict()
+        req_url = 'http://www.google.com/ig/api?weather={zip_code}'\
+                    .format(zip_code=self.zip_code)
+        xml_data = self._get_response(req_url, json_resp=False)
+        root = xml_data.getroot()
+        container = root.getchildren()[0]
+        forecasts = container.findall('forecast_conditions')
+        for forecast in forecasts:
+            forecast_dict[forecast.find('day_of_week').attrib['data']] = {
+                'low': forecast.find('low').attrib['data'],
+                'high': forecast.find('high').attrib['data'],
+                'condition': forecast.find('condition').attrib['data']
+            }
+
+        google_dict = self._gen_data_dict('google', forecast_dict)
+
+        return google_dict
+
+    def get_wuground_weather(self):
+        forecast_dict = OrderedDict()
+        req_url = \
+            'http://api.wunderground.com/api/{key}/forecast/q/{zip_code}.json'\
+                .format(key=WUGROUND_KEY, zip_code=self.zip_code)
+        json_data = self._get_response(req_url)
+        forecasts = json_data['forecast']['simpleforecast']['forecastday']
+        for forecast in forecasts:
+            forecast_dict[forecast['date']['weekday_short']] = {
+                'low': forecast['low']['fahrenheit'],
+                'high': forecast['high']['fahrenheit'],
+                'conditions': forecast['conditions']
+            }
+
+        wuground_dict = self._gen_data_dict('weather underground',
+                                                forecast_dict)
+
+        return wuground_dict
 
     def get_yahoo_weather(self):
         forecast_dict = OrderedDict()
@@ -37,35 +83,7 @@ class GetWeather(object):
                 'high': forecast['high'],
                 'conditions': forecast['text']
             }
-        return forecast_dict
 
-    def get_wuground_weather(self):
-        forecast_dict = OrderedDict()
-        req_url = \
-            'http://api.wunderground.com/api/{key}/forecast/q/{zip_code}.json'\
-                .format(key=WUGROUND_KEY, zip_code=self.zip_code)
-        json_data = self._get_response(req_url)
-        forecasts = json_data['forecast']['simpleforecast']['forecastday']
-        for forecast in forecasts:
-            forecast_dict[forecast['date']['weekday_short']] = {
-                'low': forecast['low']['fahrenheit'],
-                'high': forecast['high']['fahrenheit'],
-                'conditions': forecast['conditions']
-            }
-        return forecast_dict
+        yahoo_dict = self._gen_data_dict('yahoo', forecast_dict)
 
-    def get_google_weather(self):
-        forecast_dict = OrderedDict()
-        req_url = 'http://www.google.com/ig/api?weather={zip_code}'\
-                    .format(zip_code=self.zip_code)
-        xml_data = self._get_response(req_url, json_resp=False)
-        root = xml_data.getroot()
-        container = root.getchildren()[0]
-        forecasts = container.findall('forecast_conditions')
-        for forecast in forecasts:
-            forecast_dict[forecast.find('day_of_week').attrib['data']] = {
-                'low': forecast.find('low').attrib['data'],
-                'high': forecast.find('high').attrib['data'],
-                'condition': forecast.find('condition').attrib['data']
-            }
-        return forecast_dict
+        return yahoo_dict

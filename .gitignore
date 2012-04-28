@@ -1,3 +1,5 @@
 config.py
+*.swp
+.*.swp
 *.pyc
 __pycache__/
