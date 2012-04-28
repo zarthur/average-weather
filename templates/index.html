@@ -2,6 +2,7 @@
 <html>
     <head>
         <%include file='head_base.html'/>
+        <title>Average Weather</title>
     </head>
     <body>
         <div data-role="page" id="page1">
@@ -11,13 +12,13 @@
                 </h2>
             </div>
             <div data-role="content">
-                <form action="get_weather" method="POST" data-ajax="false">
+                <form action="get_weather" method="post">
                     <div data-role="fieldcontain">
                         <fieldset data-role="controlgroup">
-                            <label for="textinput1">
+                            <label for="zip_code">
                                 Zip Code
                             </label>
-                            <input id="textinput1" placeholder="zip_code" value="43212" type="text" />
+                            <input name="zip_code" id="zip_code" placeholder="12345" value="12345" type="text" />
                         </fieldset>
                     </div>
                     <input data-theme="b" data-icon="arrow-r" data-iconpos="right" value="Get Weather" type="submit" />

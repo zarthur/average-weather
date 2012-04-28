@@ -36,7 +36,10 @@ class AverageWeather(object):
 
     @cherrypy.expose
     def get_weather(self, *args, **kwargs):
+        print(args)
+        print(kwargs)
         zip_code = kwargs.get('zip_code')
+        print(zip_code)
         zip_test = zip_code and zip_code.isdigit() and len(zip_code) == 5
         zip_code = int(zip_code) if zip_test else 12345
         gw = query.GetWeather(zip_code)
@@ -50,12 +53,12 @@ class AverageWeather(object):
         #data passed to summary is a bit of a mess and should be reformatted
         return render('summary.html', services, days=days, lows=lows,
                       highs=highs, mean_lows=mean_lows, mean_highs=mean_highs,
-                      conditions=conditions)
+                      conditions=conditions, zip_code=zip_code)
 
 def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.config.update({'server.socket_host': '127.0.0.1',
-                            'server.socket_port': 8080})
+                            'server.socket_port': 8088})
     conf = {'/public': {'tools.staticdir.on': True,
                         'tools.staticdir.dir': os.path.join(current_dir, 'templates/public')}}
     cherrypy.quickstart(AverageWeather(), '/' , config=conf)
