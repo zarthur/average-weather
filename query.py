@@ -28,6 +28,32 @@ class GetWeather(object):
                 if json_resp else etree.parse(req_data)
         return data
 
+    def get_all(self):
+        services = [
+            self.get_google_weather,
+            self.get_wuground_weather,
+            self.get_yahoo_weather
+        ]
+        results = [x() for x in services]
+        result_count = [len(x['data']) for x in results]
+        result_max_index = result_count.index(max(result_count))
+        days = list(results[result_max_index]['data'].keys())
+        highs = []
+        lows = []
+        conditions = []
+        for dataset in results:
+            highs.append([dataset['source'], [int(dataset['data'][x]['high']) \
+                            for x in dataset['data']]])
+
+            lows.append([dataset['source'], [int(dataset['data'][x]['low']) \
+                            for x in dataset['data']]])
+
+            conditions.append([dataset['source'], [dataset['data'][x]['condition'] \
+                            for x in dataset['data']]])
+
+        return days, lows, highs, conditions
+
+
     def get_google_weather(self):
         forecast_dict = OrderedDict()
         req_url = 'http://www.google.com/ig/api?weather={zip_code}'\
@@ -38,8 +64,8 @@ class GetWeather(object):
         forecasts = container.findall('forecast_conditions')
         for forecast in forecasts:
             forecast_dict[forecast.find('day_of_week').attrib['data']] = {
-                'low': forecast.find('low').attrib['data'],
-                'high': forecast.find('high').attrib['data'],
+                'low': int(forecast.find('low').attrib['data']),
+                'high': int(forecast.find('high').attrib['data']),
                 'condition': forecast.find('condition').attrib['data']
             }
 
@@ -56,9 +82,9 @@ class GetWeather(object):
         forecasts = json_data['forecast']['simpleforecast']['forecastday']
         for forecast in forecasts:
             forecast_dict[forecast['date']['weekday_short']] = {
-                'low': forecast['low']['fahrenheit'],
-                'high': forecast['high']['fahrenheit'],
-                'conditions': forecast['conditions']
+                'low': int(forecast['low']['fahrenheit']),
+                'high': int(forecast['high']['fahrenheit']),
+                'condition': forecast['conditions']
             }
 
         wuground_dict = self._gen_data_dict('weather underground',
@@ -80,7 +106,7 @@ class GetWeather(object):
             forecast_dict[forecast['day']] = {
                 'low': forecast['low'],
                 'high': forecast['high'],
-                'conditions': forecast['text']
+                'condition': forecast['text']
             }
 
         yahoo_dict = self._gen_data_dict('yahoo', forecast_dict)

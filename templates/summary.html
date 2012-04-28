@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <%include file='head_base.html'/>
+    </head>
+    <body>
+        <div data-role="page" id="page1">
+            <div data-role="content">
+                <a data-role="button" data-rel="back" data-transition="slide" data-theme="a" href="../" data-icon="arrow-l" data-iconpos="left">
+                    New Zip Code
+                </a>
+
+                % for day_idx, day in enumerate(days):
+                    <div data-role="collapsible-set" data-theme="b" data-content-theme="">
+                    
+                        <div data-role="collapsible" data-collapsed="true">
+                            <%
+                                low_mean_num, low_mean_val = mean_lows[day_idx]
+                                high_mean_num, high_mean_val = mean_highs[day_idx]
+                            %>
+                            <h3>
+                                <b>${day.upper()}</b> Low: ${low_mean_val}  High: ${high_mean_val}
+                            </h3>
+
+                            % for srv_idx in range(len(lows)):
+                                % if len(lows[srv_idx][1]) > day_idx:
+                                    <%
+                                        service_name = ' '.join([x.capitalize() for x in lows[srv_idx][0].split(' ')])
+                                        low_val = lows[srv_idx][1][day_idx]
+                                        high_val = highs[srv_idx][1][day_idx]
+                                        cond_val = conditions[srv_idx][1][day_idx]
+                                    %>
+                                    <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
+                                        <div data-role="collapsible" data-collapsed="true">
+                                            <h3>
+                                                <b>${service_name}</b>
+                                            </h3>
+                                            <div>
+                                                <b>Low</b> ${low_val}
+                                            </div>
+                                            <div>
+                                                <b>High</b> ${high_val}
+                                            </div>
+                                            <div>
+                                                <b>Condition</b> ${cond_val}
+                                            </div>
+                                        </div>
+                                    </div>
+                                % endif
+                            % endfor
+                        </div>
+                    </div>
+                % endfor
+            </div>
+        </div>
+    </body>
+</html>
