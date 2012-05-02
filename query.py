@@ -9,11 +9,14 @@ from collections import OrderedDict
 from config import WUGROUND_KEY
 
 class GetWeather(object):
-    def __init__(self, zip_code):
+    """Class to query weather services"""
+    def __init__(self, zip_code)
         self.zip_code = zip_code
 
     @staticmethod
     def _gen_data_dict(source, data):
+        """Create a dictionary with sources as keys and data(temps) as values
+        """
         data_dict = {
             'source': source,
             'data': data
@@ -22,6 +25,9 @@ class GetWeather(object):
 
     @staticmethod
     def _get_response(req_url, json_resp=True):
+        """Get response from a sepecified URL; Process JSON if response
+        is JSON, else return data from URL request
+        """
         request = urllib.request.Request(req_url)
         req_data = urllib.request.urlopen(request)
         data = json.loads(req_data.read().decode()) \
@@ -29,6 +35,9 @@ class GetWeather(object):
         return data
 
     def get_all(self):
+        """Query all the services! and return days, lows, highs, and
+        conditions.
+        """
         services = [
             self.get_google_weather,
             #self.get_wuground_weather,

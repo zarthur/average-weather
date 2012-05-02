@@ -13,6 +13,7 @@ def mean(alist):
     return sum(alist)/len(alist)
 
 def mean_temps(temps):
+    """calulate mean temperatures, return number of sources and means"""
     means = []
     services, temp_lists = zip(*temps)
     max_length = max([len(x) for x in temp_lists])
@@ -25,6 +26,7 @@ def mean_temps(temps):
     return means
 
 def render(*args, **kwargs):
+    """shortcut render function for use with mako"""
     page = args[0]
     tmpl = lookup.get_template(page)
     return tmpl.render(**kwargs)
@@ -36,12 +38,14 @@ class AverageWeather(object):
 
     @cherrypy.expose
     def index(self):
+        """index.html page for site"""
         return render('index.html')
 
     @cherrypy.expose
     def get_weather(self, *args, **kwargs):
-        print(args)
-        print(kwargs)
+        """get zip_code from form, query services, generate plot, and
+        render summary.html with necessary parameters.
+        """
         zip_code = kwargs.get('zip_code')
         zip_code = zip_code[:5] if zip_code and len(zip_code) > 5
         zip_test = zip_code and zip_code.isdigit()
@@ -67,6 +71,7 @@ class AverageWeather(object):
                       plotfile=plotfile)
 
 def main():
+    """start the server"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.config.update({'server.socket_host': '10.0.1.111',
                             'server.socket_port': 8088})

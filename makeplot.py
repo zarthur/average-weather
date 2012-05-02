@@ -2,15 +2,19 @@ import os
 import pylab
 
 class Plot():
+    """Class to generate and save matplotlib plots of temperatures"""
     def __init__(self):
         self._counter = 0
 
-    def get_counter(self):
+    def _get_counter(self):
         counter = self._counter
         self._counter += 1 if self._counter < 100 else 0
         return counter
 
     def makeplot(self, path, labels, *y):
+        """Generate plot with lables and various data; save to
+        specified path and return filename
+        """
         x = range(len(labels))
         pylab.figure(figsize=(2.5, 2.5))
         window = [min(x), max(x)]
@@ -31,7 +35,7 @@ class Plot():
             pylab.plot(x, y_data, plotcolor)
         pylab.xticks(x, labels)
         #pylab.legend(('Low', 'High'))
-        file_name = ''.join([str(self.get_counter()), '.png'])
+        file_name = ''.join([str(self._get_counter()), '.png'])
         file_path = os.path.join(path, file_name)
         pylab.savefig(file_path)
         pylab.hold(False)
