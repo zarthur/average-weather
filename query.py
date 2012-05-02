@@ -10,7 +10,7 @@ from config import WUGROUND_KEY
 
 class GetWeather(object):
     """Class to query weather services"""
-    def __init__(self, zip_code)
+    def __init__(self, zip_code):
         self.zip_code = zip_code
 
     @staticmethod

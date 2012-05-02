@@ -47,7 +47,7 @@ class AverageWeather(object):
         render summary.html with necessary parameters.
         """
         zip_code = kwargs.get('zip_code')
-        zip_code = zip_code[:5] if zip_code and len(zip_code) > 5
+        zip_code = zip_code[:5] if (zip_code and len(zip_code) > 5) else zip_code
         zip_test = zip_code and zip_code.isdigit()
         zip_code = int(zip_code) if zip_test else 12345
         gw = query.GetWeather(zip_code)
@@ -73,8 +73,8 @@ class AverageWeather(object):
 def main():
     """start the server"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    cherrypy.config.update({'server.socket_host': '10.0.1.111',
-                            'server.socket_port': 8088})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1',
+                            'server.socket_port': 8080})
     conf = {'/public': {'tools.staticdir.on': True,
                         'tools.staticdir.dir': os.path.join(current_dir, 'templates/public')}}
     cherrypy.quickstart(AverageWeather(), '/' , config=conf)
