@@ -31,7 +31,7 @@ class GetWeather(object):
     def get_all(self):
         services = [
             self.get_google_weather,
-            self.get_wuground_weather,
+            #self.get_wuground_weather,
             self.get_yahoo_weather
         ]
         results = [x() for x in services]

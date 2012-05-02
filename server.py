@@ -4,6 +4,7 @@ import os
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
+import makeplot
 import query
 
 lookup = TemplateLookup(directories=['templates'])
@@ -30,6 +31,9 @@ def render(*args, **kwargs):
 
 
 class AverageWeather(object):
+    def __init__(self):
+        self.plotter = makeplot.Plot()
+
     @cherrypy.expose
     def index(self):
         return render('index.html')
@@ -39,8 +43,8 @@ class AverageWeather(object):
         print(args)
         print(kwargs)
         zip_code = kwargs.get('zip_code')
-        print(zip_code)
-        zip_test = zip_code and zip_code.isdigit() and len(zip_code) == 5
+        zip_code = zip_code[:5] if zip_code and len(zip_code) > 5
+        zip_test = zip_code and zip_code.isdigit()
         zip_code = int(zip_code) if zip_test else 12345
         gw = query.GetWeather(zip_code)
         days, lows, highs, conditions = gw.get_all()
@@ -50,14 +54,21 @@ class AverageWeather(object):
         mean_lows = mean_temps(lows)
         mean_highs = mean_temps(highs)
 
+        junk, lmean = zip(*mean_lows)
+        junk, hmean = zip(*mean_highs)
+
+        plotfile = self.plotter.makeplot('./templates/public/plots', 
+                                         days, lmean, hmean)
+
         #data passed to summary is a bit of a mess and should be reformatted
         return render('summary.html', services, days=days, lows=lows,
                       highs=highs, mean_lows=mean_lows, mean_highs=mean_highs,
-                      conditions=conditions, zip_code=zip_code)
+                      conditions=conditions, zip_code=zip_code, 
+                      plotfile=plotfile)
 
 def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    cherrypy.config.update({'server.socket_host': '127.0.0.1',
+    cherrypy.config.update({'server.socket_host': '10.0.1.111',
                             'server.socket_port': 8088})
     conf = {'/public': {'tools.staticdir.on': True,
                         'tools.staticdir.dir': os.path.join(current_dir, 'templates/public')}}

@@ -3,6 +3,7 @@
     <head>
         <%include file='head_base.html'/>
         <title>${zip_code}</title>
+
     </head>
     <body>
         <div data-role="page" id="page1">
@@ -10,8 +11,10 @@
                 <a data-role="button" data-rel="back" data-transition="slide" data-theme="a" href="../" data-icon="arrow-l" data-iconpos="left">
                     New Zip Code
                 </a>
-                <div>
-                </div>
+                <center>
+                    <img src="public/plots/${plotfile}" />
+                </center>
+
                 % for day_idx, day in enumerate(days):
                     <div data-role="collapsible-set" data-theme="b" data-content-theme="">
 

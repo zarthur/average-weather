@@ -7,3 +7,4 @@ Requires:
     Python 3
     CherryPy
     Mako
+    Matplotlib (for now...)
