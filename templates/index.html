@@ -15,6 +15,7 @@
                 <form action="get_weather" method="post">
                     <div data-role="fieldcontain">
                         <fieldset data-role="controlgroup">
+                            <input type="hidden" name="winwidth" id="winwidth" />
                             <label for="zip_code">
                                 Zip Code
                             </label>
@@ -26,7 +27,7 @@
             </div>
         </div>
         <script>
-            //App custom javascript
+            $('#winwidth').val(window.innerWidth);
         </script>
     </body>
 </html>

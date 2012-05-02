@@ -7,6 +7,8 @@ from mako.lookup import TemplateLookup
 import makeplot
 import query
 
+DPI = 96
+
 lookup = TemplateLookup(directories=['templates'])
 
 def mean(alist):
@@ -46,6 +48,9 @@ class AverageWeather(object):
         """get zip_code from form, query services, generate plot, and
         render summary.html with necessary parameters.
         """
+        winwidth = int(kwargs.get('winwidth', 3))
+        winwidth = round((winwidth - 10)/DPI)
+
         zip_code = kwargs.get('zip_code')
         zip_code = zip_code[:5] if (zip_code and len(zip_code) > 5) else zip_code
         zip_test = zip_code and zip_code.isdigit()
@@ -61,13 +66,13 @@ class AverageWeather(object):
         junk, lmean = zip(*mean_lows)
         junk, hmean = zip(*mean_highs)
 
-        plotfile = self.plotter.makeplot('./templates/public/plots', 
+        plotfile = self.plotter.makeplot('./templates/public/plots', winwidth,
                                          days, lmean, hmean)
 
         #data passed to summary is a bit of a mess and should be reformatted
         return render('summary.html', services, days=days, lows=lows,
                       highs=highs, mean_lows=mean_lows, mean_highs=mean_highs,
-                      conditions=conditions, zip_code=zip_code, 
+                      conditions=conditions, zip_code=zip_code,
                       plotfile=plotfile)
 
 def main():

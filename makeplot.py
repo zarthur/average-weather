@@ -11,12 +11,12 @@ class Plot():
         self._counter += 1 if self._counter < 100 else 0
         return counter
 
-    def makeplot(self, path, labels, *y):
+    def makeplot(self, path, width, labels, *y):
         """Generate plot with lables and various data; save to
         specified path and return filename
         """
         x = range(len(labels))
-        pylab.figure(figsize=(2.5, 2.5))
+        pylab.figure(figsize=(width, width))
         window = [min(x), max(x)]
         y_extrema = None
         for ydata in y:
