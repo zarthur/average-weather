@@ -49,7 +49,7 @@ class AverageWeather(object):
         render summary.html with necessary parameters.
         """
         winwidth = int(kwargs.get('winwidth', 3))
-        winwidth = round((winwidth - 10)/DPI)
+        winwidth = min([round((winwidth - 10)/DPI), 5])
 
         zip_code = kwargs.get('zip_code')
         zip_code = zip_code[:5] if (zip_code and len(zip_code) > 5) else zip_code
