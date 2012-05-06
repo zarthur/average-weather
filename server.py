@@ -56,8 +56,7 @@ class AverageWeather(object):
         zip_test = zip_code and zip_code.isdigit()
         zip_code = int(zip_code) if zip_test else 12345
         gw = query.GetWeather(zip_code)
-        days, lows, highs, conditions = gw.get_all()
-
+        days, lows, highs, conditions, icons = gw.get_all()
         services, *junk = zip(*lows)
 
         mean_lows = mean_temps(lows)
@@ -72,7 +71,7 @@ class AverageWeather(object):
         #data passed to summary is a bit of a mess and should be reformatted
         return render('summary.html', services, days=days, lows=lows,
                       highs=highs, mean_lows=mean_lows, mean_highs=mean_highs,
-                      conditions=conditions, zip_code=zip_code,
+                      conditions=conditions, zip_code=zip_code, icons=icons,
                       plotfile=plotfile)
 
 def main():

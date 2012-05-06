@@ -34,21 +34,33 @@
                                         low_val = lows[srv_idx][1][day_idx]
                                         high_val = highs[srv_idx][1][day_idx]
                                         cond_val = conditions[srv_idx][1][day_idx]
+                                        icon = icons[srv_idx][1][day_idx]
                                     %>
                                     <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
                                         <div data-role="collapsible" data-collapsed="true">
                                             <h3>
                                                 <b>${service_name}</b>
                                             </h3>
-                                            <div>
-                                                <b>Low</b> ${low_val}
-                                            </div>
-                                            <div>
-                                                <b>High</b> ${high_val}
-                                            </div>
-                                            <div>
-                                                <b>Condition</b> ${cond_val}
-                                            </div>
+                                            <table border="0">
+                                                <tr>
+                                                    <td>
+                                                        % if icon:
+                                                            <img src=${icon}>
+                                                        % endif
+                                                    </td>
+                                                    <td>
+                                                        <div>
+                                                            <b>Low</b> ${low_val}
+                                                        </div>
+                                                        <div>
+                                                            <b>High</b> ${high_val}
+                                                        </div>
+                                                        <div>
+                                                            <b>Condition</b> ${cond_val}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </div>
                                     </div>
                                 % endif

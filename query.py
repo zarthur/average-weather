@@ -34,6 +34,12 @@ class GetWeather(object):
                 if json_resp else etree.parse(req_data)
         return data
 
+    @staticmethod
+    def _get_data_list(dataset, value, isint=False):
+        datalist = [dataset['data'][x].get(value) for x in dataset['data']]
+        datalist = [int(x) for x in datalist] if isint else datalist
+        return [dataset['source'], datalist]
+
     def get_all(self):
         """Query all the services! and return days, lows, highs, and
         conditions.
@@ -50,17 +56,14 @@ class GetWeather(object):
         highs = []
         lows = []
         conditions = []
+        icons      = []
         for dataset in results:
-            highs.append([dataset['source'], [int(dataset['data'][x]['high']) \
-                            for x in dataset['data']]])
+            highs.append(self._get_data_list(dataset, 'high', isint=True))
+            lows.append(self._get_data_list(dataset, 'low', isint=True))
+            conditions.append(self._get_data_list(dataset, 'condition'))
+            icons.append(self._get_data_list(dataset, 'icon'))
 
-            lows.append([dataset['source'], [int(dataset['data'][x]['low']) \
-                            for x in dataset['data']]])
-
-            conditions.append([dataset['source'], [dataset['data'][x]['condition'] \
-                            for x in dataset['data']]])
-
-        return days, lows, highs, conditions
+        return days, lows, highs, conditions, icons
 
 
     def get_google_weather(self):
@@ -72,10 +75,16 @@ class GetWeather(object):
         container = root.getchildren()[0]
         forecasts = container.findall('forecast_conditions')
         for forecast in forecasts:
+            icon_path = urllib.request.urljoin(
+                            'http://www.google.com',
+                            forecast.find('icon').attrib['data']
+                            )
+
             forecast_dict[forecast.find('day_of_week').attrib['data']] = {
                 'low': int(forecast.find('low').attrib['data']),
                 'high': int(forecast.find('high').attrib['data']),
-                'condition': forecast.find('condition').attrib['data']
+                'condition': forecast.find('condition').attrib['data'],
+                'icon': icon_path
             }
 
         google_dict = self._gen_data_dict('google', forecast_dict)
