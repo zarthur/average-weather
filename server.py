@@ -48,13 +48,16 @@ class AverageWeather(object):
         """get zip_code from form, query services, generate plot, and
         render summary.html with necessary parameters.
         """
-        winwidth = int(kwargs.get('winwidth', 3))
-        winwidth = min([round((winwidth - 20)/DPI), 5])
-
         zip_code = kwargs.get('zip_code')
+        if not zip_code:
+            return render('index.html')
+
         zip_code = zip_code[:5] if (zip_code and len(zip_code) > 5) else zip_code
         zip_test = zip_code and zip_code.isdigit()
         zip_code = int(zip_code) if zip_test else 12345
+        winwidth = int(kwargs.get('winwidth', 3))
+        winwidth = min([round((winwidth - 20)/DPI), 5])
+
         gw = query.GetWeather(zip_code)
         days, lows, highs, conditions, icons = gw.get_all()
         services, *junk = zip(*lows)
