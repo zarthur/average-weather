@@ -41,13 +41,8 @@
                                             <h3>
                                                 <b>${service_name}</b>
                                             </h3>
-                                            <table border="0">
+                                            <table border="0" width="100%">
                                                 <tr>
-                                                    <td>
-                                                        % if icon:
-                                                            <img src=${icon}>
-                                                        % endif
-                                                    </td>
                                                     <td>
                                                         <div>
                                                             <b>Low</b> ${low_val}
@@ -58,6 +53,11 @@
                                                         <div>
                                                             <b>Condition</b> ${cond_val}
                                                         </div>
+                                                    </td>
+                                                    <td align="right" width="35px">
+                                                        % if icon:
+                                                            <img src=${icon}>
+                                                        % endif
                                                     </td>
                                                 </tr>
                                             </table>
