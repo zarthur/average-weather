@@ -28,6 +28,26 @@
         </div>
         <script>
             $('#winwidth').val(window.innerWidth);
-        </script>
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function( position ){
+                        latitude = position.coords.latitude;
+                        longitude = position.coords.longitude;
+                        zip_url = "http://ws.geonames.org/findNearbyPostalCodesJSON?lat=" + latitude + "&lng=" + longitude;
+                        $.getJSON(zip_url, function(data) {
+                            $('#zip_code').val(data['postalCodes'][0]['postalCode']);
+                        });
+                    },
+                    function( error ){
+                    },
+                    {
+                       timeout: (5 * 1000),
+                       maximumAge: (1000 * 60 * 15),
+                       enableHighAccuracy: true
+                   }
+                );
+            }
+                   
+        </script>                                                                                                                                }       
     </body>
 </html>
