@@ -24,7 +24,7 @@
                                 high_mean_num, high_mean_val = mean_highs[day_idx]
                             %>
                             <h3>
-                                <b>${day.upper()}</b> Low: ${low_mean_val}  High: ${high_mean_val}
+                                <b>${day.upper()}</b> High: ${high_mean_val} Low: ${low_mean_val}
                             </h3>
 
                             % for srv_idx in range(len(lows)):
@@ -45,10 +45,10 @@
                                                 <tr>
                                                     <td>
                                                         <div>
-                                                            <b>Low</b> ${low_val}
+                                                            <b>High</b> ${high_val}
                                                         </div>
                                                         <div>
-                                                            <b>High</b> ${high_val}
+                                                            <b>Low</b> ${low_val}
                                                         </div>
                                                         <div>
                                                             <b>Condition</b> ${cond_val}
