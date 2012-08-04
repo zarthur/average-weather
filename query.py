@@ -50,6 +50,7 @@ class GetWeather(object):
             self.get_yahoo_weather
         ]
         results = [x() for x in services]
+        current, results = zip(*results)
         result_count = [len(x['data']) for x in results]
         result_max_index = result_count.index(max(result_count))
         days = list(results[result_max_index]['data'].keys())
@@ -57,13 +58,14 @@ class GetWeather(object):
         lows = []
         conditions = []
         icons      = []
+
         for dataset in results:
             highs.append(self._get_data_list(dataset, 'high', isint=True))
             lows.append(self._get_data_list(dataset, 'low', isint=True))
             conditions.append(self._get_data_list(dataset, 'condition'))
             icons.append(self._get_data_list(dataset, 'icon'))
 
-        return days, lows, highs, conditions, icons
+        return current, days, lows, highs, conditions, icons
 
 
     def get_google_weather(self):
@@ -72,7 +74,13 @@ class GetWeather(object):
                     .format(zip_code=self.zip_code)
         xml_data = self._get_response(req_url, json_resp=False)
         root = xml_data.getroot()
+
         container = root.getchildren()[0]
+
+        current = container.find('current_conditions')
+        print(current)
+        current = current.find('temp_f').attrib['data']
+
         forecasts = container.findall('forecast_conditions')
         for forecast in forecasts:
             icon_path = urllib.request.urljoin(
@@ -88,8 +96,9 @@ class GetWeather(object):
             }
 
         google_dict = self._gen_data_dict('google', forecast_dict)
+        current_dict = self._gen_data_dict('google', current)
 
-        return google_dict
+        return current_dict, google_dict
 
     def get_wuground_weather(self):
         forecast_dict = OrderedDict()
@@ -119,6 +128,7 @@ class GetWeather(object):
             .format(zip_code=self.zip_code)
         ])
         json_data = self._get_response(req_url)
+        current = json_data['query']['results']['channel']['item']['condition']['temp']
         forecasts = json_data['query']['results']['channel']['item']['forecast']
         for forecast in forecasts:
             forecast_dict[forecast['day']] = {
@@ -128,5 +138,6 @@ class GetWeather(object):
             }
 
         yahoo_dict = self._gen_data_dict('yahoo', forecast_dict)
+        current_dict = self._gen_data_dict('yahoo', current)
 
-        return yahoo_dict
+        return current_dict, yahoo_dict

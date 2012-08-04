@@ -12,6 +12,7 @@ DPI = 96
 lookup = TemplateLookup(directories=['templates'])
 
 def mean(alist):
+    alist = [float(x) for x in alist]
     return sum(alist)/len(alist)
 
 def mean_temps(temps):
@@ -59,8 +60,16 @@ class AverageWeather(object):
         winwidth = min([round((winwidth - 20)/DPI), 5])
 
         gw = query.GetWeather(zip_code)
-        days, lows, highs, conditions, icons = gw.get_all()
+        currents, days, lows, highs, conditions, icons = gw.get_all()
         services, *junk = zip(*lows)
+
+        print(currents)
+        current_mean = []
+        for entry in currents:
+            current_mean.append(entry['data'])
+        print(current_mean)
+        current_mean = mean(current_mean)
+        current_dict = {'mean': current_mean, 'data': currents}
 
         mean_lows = mean_temps(lows)
         mean_highs = mean_temps(highs)
@@ -75,7 +84,7 @@ class AverageWeather(object):
         return render('summary.html', services, days=days, lows=lows,
                       highs=highs, mean_lows=mean_lows, mean_highs=mean_highs,
                       conditions=conditions, zip_code=zip_code, icons=icons,
-                      plotfile=plotfile)
+                      plotfile=plotfile, current_dict=current_dict)
 
 def main():
     """start the server"""

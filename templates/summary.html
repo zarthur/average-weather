@@ -15,6 +15,37 @@
                     <img src="public/plots/${plotfile}" />
                 </center>
 
+                    <div data-role="collapsible-set" data-theme="b" data-content-theme="">
+
+                        <div data-role="collapsible" data-collapsed="true">
+                            <h3>
+                                <b>Current</b> ${current_dict['mean']}
+                            </h3>
+
+                            % for entry in current_dict['data']:
+                                    <%
+                                        service_name = entry['source'].capitalize()
+                                        current_val = entry['data'] 
+                                    %>
+                                    <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
+                                        <div data-role="collapsible" data-collapsed="true">
+                                            <h3>
+                                                <b>${service_name}</b>
+                                            </h3>
+                                            <table border="0" width="100%">
+                                                <tr>
+                                                    <td>
+                                                        <div>
+                                                            <b>Current</b> ${current_val}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                            % endfor
+                    </div>
+                    </div>
                 % for day_idx, day in enumerate(days):
                     <div data-role="collapsible-set" data-theme="b" data-content-theme="">
 
