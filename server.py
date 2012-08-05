@@ -15,18 +15,6 @@ def mean(alist):
     alist = [float(x) for x in alist]
     return sum(alist)/len(alist)
 
-def mean_temps(temps):
-    """calulate mean temperatures, return number of sources and means"""
-    means = []
-    services, temp_lists = zip(*temps)
-    max_length = max([len(x) for x in temp_lists])
-    for i in range(max_length):
-        temporary = []
-        for tlist in temp_lists:
-            if len(tlist) > i:
-                temporary.append(tlist[i])
-        means.append((len(temporary), round(mean(temporary))))
-    return means
 
 def render(*args, **kwargs):
     """shortcut render function for use with mako"""
@@ -60,31 +48,37 @@ class AverageWeather(object):
         winwidth = min([round((winwidth - 20)/DPI), 5])
 
         gw = query.GetWeather(zip_code)
-        currents, days, lows, highs, conditions, icons = gw.get_all()
-        services, *junk = zip(*lows)
+        results = gw.get_all()
 
-        print(currents)
-        current_mean = []
-        for entry in currents:
-            current_mean.append(entry['data'])
-        print(current_mean)
-        current_mean = mean(current_mean)
-        current_dict = {'mean': current_mean, 'data': currents}
+        services = [x['source'] for x in results]
+        current = [x['data'].pop('current') for x in results]
+        forecast = [x['data'] for x in results]
 
-        mean_lows = mean_temps(lows)
-        mean_highs = mean_temps(highs)
+        lows, highs = [], []
+        days = []
+        for source in forecast:
+            days = list(source.keys()) if len(source.keys()) > len(days) \
+                    else days
+        for day in days:
+            low_list = []
+            high_list = []
+            for source in forecast:
+                if day in source:
+                    low_list.append(source[day]['low'])
+                    high_list.append(source[day]['high'])
+            lows.append(low_list)
+            highs.append(high_list)
 
-        junk, lmean = zip(*mean_lows)
-        junk, hmean = zip(*mean_highs)
+        mean_lows = [mean(x) for x in lows]
+        mean_highs = [mean(x) for x in highs]
 
         plotfile = self.plotter.makeplot('./templates/public/plots', winwidth,
-                                         days, lmean, hmean)
+                                         days, mean_lows, mean_highs)
 
-        #data passed to summary is a bit of a mess and should be reformatted
-        return render('summary.html', services, days=days, lows=lows,
-                      highs=highs, mean_lows=mean_lows, mean_highs=mean_highs,
-                      conditions=conditions, zip_code=zip_code, icons=icons,
-                      plotfile=plotfile, current_dict=current_dict)
+        return render('summary.html', zip_code=zip_code, services=services,
+                      days=days, forecast=forecast, current=current,
+                      mean_lows=mean_lows, mean_highs=mean_highs,
+                      plotfile=plotfile)
 
 def main():
     """start the server"""
@@ -92,7 +86,8 @@ def main():
     cherrypy.config.update({'server.socket_host': '127.0.0.1',
                             'server.socket_port': 8080})
     conf = {'/public': {'tools.staticdir.on': True,
-                        'tools.staticdir.dir': os.path.join(current_dir, 'templates/public')}}
+                        'tools.staticdir.dir': os.path.join(current_dir,
+                                                'templates/public')}}
     cherrypy.quickstart(AverageWeather(), '/' , config=conf)
 
 if __name__ == '__main__':

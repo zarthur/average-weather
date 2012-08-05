@@ -15,86 +15,79 @@
                     <img src="public/plots/${plotfile}" />
                 </center>
 
-                    <div data-role="collapsible-set" data-theme="b" data-content-theme="">
+                <div data-role="collapsible-set" data-theme="b" data-content-theme="">
 
-                        <div data-role="collapsible" data-collapsed="true">
-                            <h3>
-                                <b>Current</b> ${current_dict['mean']}
-                            </h3>
+                    <div data-role="collapsible" data-collapsed="true">
+                        <h3>
+                            <%
+                                current_temp = [float(x['temp']) for x in current]
+                                current_temp = sum(current_temp)/len(current_temp)
+                            %>
+                            <b>CURRENT</b> ${int(current_temp)}
+                        </h3>
 
-                            % for entry in current_dict['data']:
-                                    <%
-                                        service_name = entry['source'].capitalize()
-                                        current_val = entry['data'] 
-                                    %>
-                                    <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
-                                        <div data-role="collapsible" data-collapsed="true">
-                                            <h3>
-                                                <b>${service_name}</b>
-                                            </h3>
+                        % for i, entry in enumerate(current):
+                                <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
+                                    <div data-role="collapsible" data-collapsed="true">
+                                        <h3>
+                                            <b>${services[i].capitalize()}</b>
+                                        </h3>
+                                        <table border="0" width="100%"><tr><td><div>
                                             <table border="0" width="100%">
-                                                <tr>
-                                                    <td>
-                                                        <div>
-                                                            <b>Current</b> ${current_val}
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                                <tr><td>
+                                                    <div><b>Temperature</b> ${entry['temp']}</div>
+                                                    % if 'humidity' in entry:
+                                                        <div><b>Humidity</b> ${entry['humidity']}</div>
+                                                    % endif
+                                                    % if 'wind' in entry:
+                                                        <div><b>Wind</b> ${entry['wind']}</div>
+                                                    % endif
+                                                    <div><b>Condition</b> ${entry['condition']}</div>
+                                                </td><td align="right" width="35px">
+                                                    % if 'icon' in entry:
+                                                        <img src=${entry['icon']}>
+                                                    % endif
+                                                </td></tr>
                                             </table>
-                                        </div>
+                                        </div></td></tr></table>
                                     </div>
-                            % endfor
+                                </div>
+                        % endfor
                     </div>
-                    </div>
+                </div>
                 % for day_idx, day in enumerate(days):
                     <div data-role="collapsible-set" data-theme="b" data-content-theme="">
-
                         <div data-role="collapsible" data-collapsed="true">
-                            <%
-                                low_mean_num, low_mean_val = mean_lows[day_idx]
-                                high_mean_num, high_mean_val = mean_highs[day_idx]
-                            %>
                             <h3>
-                                <b>${day.upper()}</b> High: ${high_mean_val} Low: ${low_mean_val}
+                                <b>${day.upper()}</b> High: ${int(mean_highs[day_idx])} Low: ${int(mean_lows[day_idx])}
                             </h3>
 
-                            % for srv_idx in range(len(lows)):
-                                % if len(lows[srv_idx][1]) > day_idx:
-                                    <%
-                                        service_name = ' '.join([x.capitalize() for x in lows[srv_idx][0].split(' ')])
-                                        low_val = lows[srv_idx][1][day_idx]
-                                        high_val = highs[srv_idx][1][day_idx]
-                                        cond_val = conditions[srv_idx][1][day_idx]
-                                        icon = icons[srv_idx][1][day_idx]
-                                    %>
+                            % for entry_idx, entry in enumerate(forecast):
+                                %if day in entry:
                                     <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
                                         <div data-role="collapsible" data-collapsed="true">
                                             <h3>
-                                                <b>${service_name}</b>
+                                                <b>${services[entry_idx].capitalize()}</b>
                                             </h3>
-                                            <table border="0" width="100%">
-                                                <tr>
-                                                    <td>
-                                                        <div>
-                                                            <b>High</b> ${high_val}
-                                                        </div>
-                                                        <div>
-                                                            <b>Low</b> ${low_val}
-                                                        </div>
-                                                        <div>
-                                                            <b>Condition</b> ${cond_val}
-                                                        </div>
-                                                    </td>
-                                                    <td align="right" width="35px">
-                                                        % if icon:
-                                                            <img src=${icon}>
-                                                        % endif
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                            <table border="0" width="100%"><tr><td>
+                                                <div>
+                                                    <b>High</b> ${entry[day]['high']}
+                                                </div>
+                                                <div>
+                                                    <b>Low</b> ${entry[day]['low']}
+                                                </div>
+                                                <div>
+                                                    <b>Condition</b> ${entry[day]['condition']}
+                                                </div>
+                                            </td>
+                                            <td align="right" width="35px">
+                                                % if 'icon' in entry[day]:
+                                                    <img src=${entry[day]['icon']}>
+                                                % endif
+                                            </td></tr></table>
                                         </div>
                                     </div>
-                                % endif
+                                %endif
                             % endfor
                         </div>
                     </div>

@@ -3,4 +3,5 @@ config.py
 .*.swp
 *.pyc
 *.png
+*.orig
 __pycache__/

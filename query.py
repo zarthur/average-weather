@@ -1,4 +1,5 @@
-#python 3
+"""Provides interface to Google and Yahoo for weather querying.
+"""
 
 import json
 import urllib.request
@@ -6,7 +7,11 @@ import xml.etree.ElementTree as etree
 
 from collections import OrderedDict
 
-from config import WUGROUND_KEY
+
+GOOGLE_URL = 'http://www.google.com/ig/api?weather={zip_code}'
+YAHOO_URL = 'http://query.yahooapis.com/v1/public/yql?'\
+            'q=select%20item%20from%20weather.forecast%20where%20'\
+            'location=%22{zip_code}%22&format=json'
 
 class GetWeather(object):
     """Class to query weather services"""
@@ -34,44 +39,21 @@ class GetWeather(object):
                 if json_resp else etree.parse(req_data)
         return data
 
-    @staticmethod
-    def _get_data_list(dataset, value, isint=False):
-        datalist = [dataset['data'][x].get(value) for x in dataset['data']]
-        datalist = [int(x) for x in datalist] if isint else datalist
-        return [dataset['source'], datalist]
-
     def get_all(self):
-        """Query all the services! and return days, lows, highs, and
-        conditions.
-        """
+        """Query the services and unpack the results."""
         services = [
             self.get_google_weather,
-            #self.get_wuground_weather,
             self.get_yahoo_weather
         ]
         results = [x() for x in services]
-        current, results = zip(*results)
-        result_count = [len(x['data']) for x in results]
-        result_max_index = result_count.index(max(result_count))
-        days = list(results[result_max_index]['data'].keys())
-        highs = []
-        lows = []
-        conditions = []
-        icons      = []
 
-        for dataset in results:
-            highs.append(self._get_data_list(dataset, 'high', isint=True))
-            lows.append(self._get_data_list(dataset, 'low', isint=True))
-            conditions.append(self._get_data_list(dataset, 'condition'))
-            icons.append(self._get_data_list(dataset, 'icon'))
-
-        return current, days, lows, highs, conditions, icons
+        return results
 
 
     def get_google_weather(self):
+        """Query Google for weather information, returns results dictionary."""
         forecast_dict = OrderedDict()
-        req_url = 'http://www.google.com/ig/api?weather={zip_code}'\
-                    .format(zip_code=self.zip_code)
+        req_url = GOOGLE_URL.format(zip_code=self.zip_code)
         xml_data = self._get_response(req_url, json_resp=False)
         root = xml_data.getroot()
 
@@ -79,14 +61,24 @@ class GetWeather(object):
 
         current = container.find('current_conditions')
         print(current)
-        current = current.find('temp_f').attrib['data']
+        icon_path = urllib.request.urljoin(
+                        'http://www.google.com',
+                        current.find('icon').attrib['data']
+        )
+        forecast_dict['current'] = {
+            'condition': current.find('condition').attrib['data'],
+            'temp': current.find('temp_f').attrib['data'],
+            'icon': icon_path,
+            'humidity': current.find('humidity').attrib['data'].split(':')[-1],
+            'wind': current.find('wind_condition').attrib['data'].split(':')[-1],
+        }
 
         forecasts = container.findall('forecast_conditions')
         for forecast in forecasts:
             icon_path = urllib.request.urljoin(
                             'http://www.google.com',
                             forecast.find('icon').attrib['data']
-                            )
+            )
 
             forecast_dict[forecast.find('day_of_week').attrib['data']] = {
                 'low': int(forecast.find('low').attrib['data']),
@@ -96,39 +88,21 @@ class GetWeather(object):
             }
 
         google_dict = self._gen_data_dict('google', forecast_dict)
-        current_dict = self._gen_data_dict('google', current)
 
-        return current_dict, google_dict
-
-    def get_wuground_weather(self):
-        forecast_dict = OrderedDict()
-        req_url = \
-            'http://api.wunderground.com/api/{key}/forecast/q/{zip_code}.json'\
-                .format(key=WUGROUND_KEY, zip_code=self.zip_code)
-        json_data = self._get_response(req_url)
-        forecasts = json_data['forecast']['simpleforecast']['forecastday']
-        for forecast in forecasts:
-            forecast_dict[forecast['date']['weekday_short']] = {
-                'low': int(forecast['low']['fahrenheit']),
-                'high': int(forecast['high']['fahrenheit']),
-                'condition': forecast['conditions']
-            }
-
-        wuground_dict = self._gen_data_dict('weather underground',
-                                                forecast_dict)
-
-        return wuground_dict
+        return google_dict
 
     def get_yahoo_weather(self):
+        """Query Yahoo for weather information, returns results dictionary."""
         forecast_dict = OrderedDict()
-        req_url = ''.join([
-            'http://query.yahooapis.com/v1/public/yql?',
-            'q=select%20item%20from%20weather.forecast%20where%20',
-            'location=%22{zip_code}%22&format=json'\
-            .format(zip_code=self.zip_code)
-        ])
+        req_url = YAHOO_URL.format(zip_code=self.zip_code)
         json_data = self._get_response(req_url)
-        current = json_data['query']['results']['channel']['item']['condition']['temp']
+
+        current = json_data['query']['results']['channel']['item']['condition']
+        forecast_dict['current'] = {
+            'temp': current['temp'],
+            'condition': current['text']
+        }
+
         forecasts = json_data['query']['results']['channel']['item']['forecast']
         for forecast in forecasts:
             forecast_dict[forecast['day']] = {
@@ -138,6 +112,9 @@ class GetWeather(object):
             }
 
         yahoo_dict = self._gen_data_dict('yahoo', forecast_dict)
-        current_dict = self._gen_data_dict('yahoo', current)
 
-        return current_dict, yahoo_dict
+        return yahoo_dict
+
+if __name__ == '__main__':
+    gw = GetWeather(90210)
+    results = gw.get_all()
