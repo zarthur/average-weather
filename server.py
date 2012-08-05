@@ -1,3 +1,7 @@
+"""Generate a website to prompt a user for a zip code and
+return weather information with supplied zip code.
+"""
+
 import cherrypy
 import os
 
@@ -12,19 +16,22 @@ DPI = 96
 lookup = TemplateLookup(directories=['templates'])
 
 def mean(alist):
+    """Returns the mean of a list of values."""
     alist = [float(x) for x in alist]
     return sum(alist)/len(alist)
 
 
 def render(*args, **kwargs):
-    """shortcut render function for use with mako"""
+    """Shortcut render function for use with mako"""
     page = args[0]
     tmpl = lookup.get_template(page)
     return tmpl.render(**kwargs)
 
 
 class AverageWeather(object):
+    """Main class; represents the website."""
     def __init__(self):
+        """Set the plotter"""
         self.plotter = makeplot.Plot()
 
     @cherrypy.expose

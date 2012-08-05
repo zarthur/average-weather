@@ -1,12 +1,23 @@
+"""Generate plots for high/low temperatures using matplotlib
+
+Using javascript to generate plots didn't work due to a problem
+with JQuery Mobile.  Thus, static images are generated using
+matplotlib.
+"""
+
 import os
 import pylab
 
 class Plot():
     """Class to generate and save matplotlib plots of temperatures"""
     def __init__(self):
+        """Set the counter to zero."""
         self._counter = 0
 
     def _get_counter(self):
+        """Keep track of file counter.  Ensures that there are never
+        more plot files than the number specified in the code.
+        """
         counter = self._counter
         self._counter += 1 if self._counter < 100 else 0
         return counter
