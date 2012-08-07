@@ -13,6 +13,7 @@ YAHOO_URL = 'http://query.yahooapis.com/v1/public/yql?'\
             'q=select%20item%20from%20weather.forecast%20where%20'\
             'location=%22{zip_code}%22&format=json'
 
+
 class GetWeather(object):
     """Class to query weather services"""
     def __init__(self, zip_code):
@@ -49,7 +50,6 @@ class GetWeather(object):
 
         return results
 
-
     def get_google_weather(self):
         """Query Google for weather information, returns results dictionary."""
         forecast_dict = OrderedDict()
@@ -70,7 +70,8 @@ class GetWeather(object):
             'temp': current.find('temp_f').attrib['data'],
             'icon': icon_path,
             'humidity': current.find('humidity').attrib['data'].split(':')[-1],
-            'wind': current.find('wind_condition').attrib['data'].split(':')[-1],
+            'wind': current.find('wind_condition').attrib['data']\
+                    .split(':')[-1]
         }
 
         forecasts = container.findall('forecast_conditions')
@@ -103,7 +104,8 @@ class GetWeather(object):
             'condition': current['text']
         }
 
-        forecasts = json_data['query']['results']['channel']['item']['forecast']
+        forecasts = json_data['query']['results']['channel']['item']\
+                    ['forecast']
         for forecast in forecasts:
             forecast_dict[forecast['day']] = {
                 'low': forecast['low'],

@@ -8,6 +8,7 @@ matplotlib.
 import os
 import pylab
 
+
 class Plot():
     """Class to generate and save matplotlib plots of temperatures"""
     def __init__(self):
@@ -33,8 +34,9 @@ class Plot():
         for ydata in y:
             y_min = min(ydata)
             y_max = max(ydata)
-            y_extrema = [min([y_extrema[0], y_min]), max([y_extrema[1], y_max])] \
-                            if y_extrema else [y_min, y_max]
+            y_extrema = [min([y_extrema[0], y_min]),
+                            max([y_extrema[1], y_max])] \
+                        if y_extrema else [y_min, y_max]
         window.extend(y_extrema)
         xm, xM, ym, yM = window
         window = [xm, xM, ym - 10, yM + 10]

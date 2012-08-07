@@ -5,7 +5,6 @@ return weather information with supplied zip code.
 import cherrypy
 import os
 
-from mako.template import Template
 from mako.lookup import TemplateLookup
 
 import makeplot
@@ -15,10 +14,11 @@ DPI = 96
 
 lookup = TemplateLookup(directories=['templates'])
 
+
 def mean(alist):
     """Returns the mean of a list of values."""
     alist = [float(x) for x in alist]
-    return sum(alist)/len(alist)
+    return sum(alist) / len(alist)
 
 
 def render(*args, **kwargs):
@@ -48,11 +48,12 @@ class AverageWeather(object):
         if not zip_code:
             return render('index.html')
 
-        zip_code = zip_code[:5] if (zip_code and len(zip_code) > 5) else zip_code
+        zip_code = zip_code[:5] if (zip_code and len(zip_code) > 5) \
+                    else zip_code
         zip_test = zip_code and zip_code.isdigit()
         zip_code = int(zip_code) if zip_test else 12345
         winwidth = int(kwargs.get('winwidth', 3))
-        winwidth = min([round((winwidth - 20)/DPI), 5])
+        winwidth = min([round((winwidth - 20) / DPI), 5])
 
         gw = query.GetWeather(zip_code)
         results = gw.get_all()
@@ -87,6 +88,7 @@ class AverageWeather(object):
                       mean_lows=mean_lows, mean_highs=mean_highs,
                       plotfile=plotfile)
 
+
 def main():
     """start the server"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -95,7 +97,7 @@ def main():
     conf = {'/public': {'tools.staticdir.on': True,
                         'tools.staticdir.dir': os.path.join(current_dir,
                                                 'templates/public')}}
-    cherrypy.quickstart(AverageWeather(), '/' , config=conf)
+    cherrypy.quickstart(AverageWeather(), '/', config=conf)
 
 if __name__ == '__main__':
     main()
