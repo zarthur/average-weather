@@ -70,7 +70,7 @@ class GetWeather(object):
             'temp': current.find('temp_f').attrib['data'],
             'icon': icon_path,
             'humidity': current.find('humidity').attrib['data'].split(':')[-1],
-            'wind': current.find('wind_condition').attrib['data']\
+            'wind': current.find('wind_condition').attrib['data']
                     .split(':')[-1]
         }
 
