@@ -43,7 +43,7 @@ class GetWeather(object):
     def get_all(self):
         """Query the services and unpack the results."""
         services = [
-            self.get_google_weather,
+            # self.get_google_weather,
             self.get_yahoo_weather
         ]
         results = [x() for x in services]
