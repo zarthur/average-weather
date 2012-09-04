@@ -29,6 +29,9 @@ COUNTRY_URL = 'http://ws.geonames.org/countryInfoJSON?formatted=true'\
               '&lang=en&country={country_code}&style=full'
 
 
+def c_to_f(cel):
+    return 9 / 5 * (cel) + 32
+
 def get_response(req_url, json_resp=True):
     """Get response from a sepecified URL; Process JSON if response
     is JSON, else return data from URL request
@@ -38,6 +41,12 @@ def get_response(req_url, json_resp=True):
     data = json.loads(req_data.read().decode()) \
             if json_resp else etree.parse(req_data)
     return data
+
+def update_dict_list(dictionary, key, value):
+    if key not in dictionary:
+        dictionary[key] = []
+    dictionary[key].append(value)
+    return dictionary
 
 def xml_to_dict(el):
     """Convert XML to python dictionary.
@@ -155,7 +164,7 @@ class GetWeather(object):
         """Query yr.no for weather information, returns results dictionary."""
         # first, get place names from zip code
         place_json = get_response(
-                        ZIP_PLACE_URL.format(zip_code=zip_code))
+                        ZIP_PLACE_URL.format(zip_code=self.zip_code))
         place_json = place_json['postalCodes'][0]
         place_name = place_json['placeName']
         admin_name1 = place_json['adminName1']
@@ -168,7 +177,8 @@ class GetWeather(object):
 
         # get data from yr.no
         yrno_xml = get_response(YR_NO_URL.format(
-            country=country, admin_name1=admin_name1, place_name=place_name))
+            country=country, admin_name1=admin_name1, place_name=place_name),
+            json_resp=False)
         yrno_xml = yrno_xml.getroot()
         yrno_dict = xml_to_dict(yrno_xml)
 
@@ -178,7 +188,25 @@ class GetWeather(object):
             return yrno_dict['weatherdata']['children'][1]['credit']\
                             ['children'][0]['link']['attrib']
 
+        forecast_data = yrno_dict['weatherdata']['children'][5]['forecast']\
+                                 ['children'][0]['tabular']['children']
 
+        temps = OrderedDict()
+        for time_period in forecast_data:
+            data = time_period['time']
+            from_time = data['attrib']['from'].split('T')[0]
+            to_time = data['attrib']['to'].split('T')[0]
+            temp = c_to_f(int(data['children'][4]['temperature']\
+                                    ['attrib']['value']))
+            temps = update_dict_list(temps, from_time, temp)
+            if from_time != to_time:
+                temps = update_dict_list(temps, to_time, temp)
+
+        current = temps[list(temps.keys())[0]][0]
+        lowhigh = OrderedDict([(date, (min(temps[date]), max(temps[date])))
+                                for date in temps])
+
+        return lowhigh
 
 if __name__ == '__main__':
     gw = GetWeather(90210)
