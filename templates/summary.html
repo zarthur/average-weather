@@ -93,6 +93,14 @@
                     </div>
                 % endfor
             </div>
+            <div name="citations">
+                Sources:
+                <ul>
+                % for cite in cites:
+                    <li><a href=${cite['url']}>${cite['text']}</a></li>
+                % endfor
+                </ul>
+            </div>
             <%include file='body_foot.html'/>
         </div>
     </body>

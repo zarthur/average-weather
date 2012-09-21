@@ -1,12 +1,23 @@
 """Provides interface to Google and Yahoo for weather querying.
 """
 
+import datetime
 import json
 import urllib.request
 import xml.etree.ElementTree as etree
 
 from collections import OrderedDict
 
+
+DAYDICT = {
+    0: 'Sun',
+    1: 'Mon',
+    2: 'Tue',
+    3: 'Wed',
+    4: 'Thu',
+    5: 'Fri',
+    6: 'Sat'
+}
 
 # Google weather url, returns XML
 GOOGLE_URL = 'http://www.google.com/ig/api?weather={zip_code}'
@@ -30,7 +41,31 @@ COUNTRY_URL = 'http://ws.geonames.org/countryInfoJSON?formatted=true'\
 
 
 def c_to_f(cel):
-    return 9 / 5 * (cel) + 32
+    """Convert celsius to fahrenheit (what an awful word to spell)"""
+    return 9 / 5 * float(cel) + 32
+
+def date_to_day(date_string):
+    """Converts a date string in the form YYYY-MM-DD to a weekday
+    and returns the weekday string
+    """
+    date = [int(x) for x in date_string.split('-')]
+    day = DAYDICT[datetime.date(*date).weekday()]
+    return day
+
+def find_most_frequent(dict):
+    """Replaces list used for dictionary value with element
+    that appears most frequently; if none found, uses middle element
+    """
+    temp_dict = OrderedDict()
+    for key, value in dict.items():
+        counts = [value.count(x) for x in value]
+        maxcount = max(counts)
+        if maxcount > 1:
+            temp_dict[key] = value[counts.index(maxcount)]
+        else:
+            index = len(value) // 2
+            temp_dict[key] = value[index]
+    return temp_dict
 
 def get_response(req_url, json_resp=True):
     """Get response from a sepecified URL; Process JSON if response
@@ -69,12 +104,13 @@ class GetWeather(object):
         self.zip_code = zip_code
 
     @staticmethod
-    def _gen_data_dict(source, data):
+    def _gen_data_dict(source, data, cite):
         """Create a dictionary with sources as keys and data(temps) as values
         """
         data_dict = {
             'source': source,
-            'data': data
+            'data': data,
+            'cite': cite
         }
         return data_dict
 
@@ -83,11 +119,10 @@ class GetWeather(object):
         services = [
             # self.get_google_weather,
             self.get_yahoo_weather,
-            # self.get_yrno_weather
+            self.get_yrno_weather
         ]
         results = [x() for x in services]
-        cites = [x(get_cite=True) for x in service]
-        return results, cites
+        return results
 
     def get_google_weather(self):
         """Query Google for weather information, returns results dictionary."""
@@ -156,11 +191,13 @@ class GetWeather(object):
                 'condition': forecast['text']
             }
 
-        yahoo_dict = self._gen_data_dict('yahoo', forecast_dict)
+        cite = {'text': 'yahoo', 'url': 'http://www.yahoo.com'}
+
+        yahoo_dict = self._gen_data_dict('yahoo', forecast_dict, cite)
 
         return yahoo_dict
 
-    def get_yrno_weather(self, get_cite=False):
+    def get_yrno_weather(self):
         """Query yr.no for weather information, returns results dictionary."""
         # first, get place names from zip code
         place_json = get_response(
@@ -183,30 +220,66 @@ class GetWeather(object):
         yrno_dict = xml_to_dict(yrno_xml)
 
         # process data
-        if get_cite:
-            # return citation text and url, per yr.no terms
-            return yrno_dict['weatherdata']['children'][1]['credit']\
-                            ['children'][0]['link']['attrib']
+
+
+        # return citation text and url, per yr.no terms
+        cite = yrno_dict['weatherdata']['children'][1]['credit']\
+                        ['children'][0]['link']['attrib']
 
         forecast_data = yrno_dict['weatherdata']['children'][5]['forecast']\
                                  ['children'][0]['tabular']['children']
 
+        forecast_dict = OrderedDict()
+
+        # get current conditions
+        forecast_dict['current'] = {
+            'condition': forecast_data[0]['time']['children'][0]['symbol']\
+                        ['attrib']['name'],
+            'temp': int(c_to_f(forecast_data[0]['time']['children'][4]\
+                        ['temperature']['attrib']['value']))
+
+        }
+
+
+        # record future conditions
         temps = OrderedDict()
+        conds = OrderedDict()
         for time_period in forecast_data:
             data = time_period['time']
             from_time = data['attrib']['from'].split('T')[0]
             to_time = data['attrib']['to'].split('T')[0]
+            condition = data['children'][0]['symbol']['attrib']['name']
             temp = c_to_f(int(data['children'][4]['temperature']\
                                     ['attrib']['value']))
             temps = update_dict_list(temps, from_time, temp)
             if from_time != to_time:
                 temps = update_dict_list(temps, to_time, temp)
+                conds = update_dict_list(conds, to_time, condition)
 
-        current = temps[list(temps.keys())[0]][0]
-        lowhigh = OrderedDict([(date, (min(temps[date]), max(temps[date])))
-                                for date in temps])
+        lowhigh = OrderedDict([(date, (int(min(temps[date])),
+                                int(max(temps[date])))) for date in temps])
 
-        return lowhigh
+        conds = find_most_frequent(conds)
+        keylist = list(conds.keys())
+
+        # put data into dict with weekday names as keys
+        for i in range(len(keylist)):
+            key = keylist[i]
+            day = date_to_day(key)
+
+            # stop if there's already a week's worth of data
+            if day in forecast_dict:
+                break
+            else:
+                forecast_dict[day] = {
+                    'low': lowhigh[key][0],
+                    'high': lowhigh[key][1],
+                    'condition': conds[key]
+                }
+
+        yrno_dict = self._gen_data_dict('yr.no', forecast_dict, cite)
+
+        return yrno_dict
 
 if __name__ == '__main__':
     gw = GetWeather(90210)

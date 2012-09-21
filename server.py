@@ -58,6 +58,7 @@ class AverageWeather(object):
         gw = query.GetWeather(zip_code)
         results = gw.get_all()
 
+        cites = [x['cite'] for x in results]
         services = [x['source'] for x in results]
         current = [x['data'].pop('current') for x in results]
         forecast = [x['data'] for x in results]
@@ -86,7 +87,7 @@ class AverageWeather(object):
         return render('summary.html', zip_code=zip_code, services=services,
                       days=days, forecast=forecast, current=current,
                       mean_lows=mean_lows, mean_highs=mean_highs,
-                      plotfile=plotfile)
+                      plotfile=plotfile, cites=cites)
 
 
 def main():
