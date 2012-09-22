@@ -100,9 +100,13 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.config.update({'server.socket_host': '127.0.0.1',
                             'server.socket_port': 8080})
-    conf = {'/public': {'tools.staticdir.on': True,
-                        'tools.staticdir.dir': os.path.join(current_dir,
-                                                'templates/public')}}
+    conf = {
+        '/': {'tools.caching.on': False},
+        '/public': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(current_dir, 'templates/public')
+        }
+    }
     cherrypy.quickstart(AverageWeather(), '/', config=conf)
 
 if __name__ == '__main__':
