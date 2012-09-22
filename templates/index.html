@@ -1,54 +1,49 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <%include file='head_base.html'/>
-        <title>Average Weather</title>
-    </head>
-    <body>
-        <div data-role="page" id="page1">
-            <div data-theme="a" data-role="header">
-                <h2>
-                    Get Weather
-                </h2>
+
+<%include file='head_base.html'/>
+
+<div data-role="page" id="page1">
+    <div data-theme="a" data-role="header">
+        <h2>
+            Get Weather
+        </h2>
+    </div>
+    <div data-role="content">
+        <form action="get_weather" method="get">
+            <div data-role="fieldcontain">
+                <fieldset data-role="controlgroup">
+                    <input type="hidden" name="winwidth" id="winwidth" />
+                    <label for="zip_code">
+                        Zip Code
+                    </label>
+                    <input name="zip_code" id="zip_code" placeholder="12345" type="text" />
+                </fieldset>
             </div>
-            <div data-role="content">
-                <form action="get_weather" method="post">
-                    <div data-role="fieldcontain">
-                        <fieldset data-role="controlgroup">
-                            <input type="hidden" name="winwidth" id="winwidth" />
-                            <label for="zip_code">
-                                Zip Code
-                            </label>
-                            <input name="zip_code" id="zip_code" placeholder="12345" type="text" />
-                        </fieldset>
-                    </div>
-                    <input data-theme="b" data-icon="arrow-r" data-iconpos="right" value="Get Weather" type="submit" />
-                </form>
-            </div>
-        <%include file='body_foot.html'/>
-        </div>
-        <script>
-            $('#winwidth').val(window.innerWidth);
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function( position ){
-                        latitude = position.coords.latitude;
-                        longitude = position.coords.longitude;
-                        zip_url = "http://ws.geonames.org/findNearbyPostalCodesJSON?lat=" + latitude + "&lng=" + longitude;
-                        $.getJSON(zip_url, function(data) {
-                            $('#zip_code').val(data['postalCodes'][0]['postalCode']);
-                        });
-                    },
-                    function( error ){
-                    },
-                    {
-                       timeout: (5 * 1000),
-                       maximumAge: (1000 * 60 * 15),
-                       enableHighAccuracy: true
-                   }
-                );
-            }
-                   
-        </script>
-    </body>
-</html>
+            <input data-theme="b" data-icon="arrow-r" data-iconpos="right" value="Get Weather" type="submit" />
+        </form>
+    </div>
+
+</div>
+<script>
+    $('#winwidth').val(window.innerWidth);
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function( position ){
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+                zip_url = "http://ws.geonames.org/findNearbyPostalCodesJSON?lat=" + latitude + "&lng=" + longitude;
+                $.getJSON(zip_url, function(data) {
+                    $('#zip_code').val(data['postalCodes'][0]['postalCode']);
+                });
+            },
+            function( error ){
+            },
+            {
+               timeout: (5 * 1000),
+               maximumAge: (1000 * 60 * 15),
+               enableHighAccuracy: true
+           }
+        );
+    }
+
+</script>
+<%include file='body_foot.html'/>

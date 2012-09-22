@@ -98,7 +98,7 @@ class AverageWeather(object):
 def main():
     """start the server"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    cherrypy.config.update({'server.socket_host': '127.0.0.1',
+    cherrypy.config.update({'server.socket_host': '0.0.0.0',
                             'server.socket_port': 8080})
     conf = {
         '/': {'tools.caching.on': False},

@@ -28,7 +28,7 @@ class Plot():
         specified path and return filename
         """
         x = range(len(labels))
-        pylab.figure(figsize=(width, 1.1* width))
+        pylab.figure(figsize=(width, 1.25* width))
         window = [min(x), max(x)]
         y_extrema = None
         for ydata in y:
