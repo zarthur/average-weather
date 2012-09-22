@@ -1,5 +1,5 @@
 
-<%include file='head_base.html'/>
+<%include file='page_head.html'/>
 
 <div data-role="page" id="page1">
     <div data-theme="a" data-role="header">
@@ -21,8 +21,9 @@
             <input data-theme="b" data-icon="arrow-r" data-iconpos="right" value="Get Weather" type="submit" />
         </form>
     </div>
-
+    <%include file='page_links.html'/>
 </div>
+
 <script>
     $('#winwidth').val(window.innerWidth);
     if (navigator.geolocation) {
@@ -46,4 +47,4 @@
     }
 
 </script>
-<%include file='body_foot.html'/>
+<%include file='page_foot.html'/>
