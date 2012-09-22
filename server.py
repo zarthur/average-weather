@@ -37,6 +37,7 @@ class AverageWeather(object):
     @cherrypy.expose
     def index(self):
         """index.html page for site"""
+        cherrypy.response.headers['Cache-Control'] = "no-cache"
         return render('index.html')
 
     @cherrypy.expose
@@ -44,6 +45,7 @@ class AverageWeather(object):
         """get zip_code from form, query services, generate plot, and
         render summary.html with necessary parameters.
         """
+        cherrypy.response.headers['Cache-Control'] = "no-cache"
         zip_code = kwargs.get('zip_code')
         if not zip_code:
             return render('index.html')
