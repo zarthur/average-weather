@@ -28,7 +28,7 @@ class Plot():
         specified path and return filename
         """
         x = range(len(labels))
-        pylab.figure(figsize=(width, width + 25))
+        pylab.figure(figsize=(width, width))
         window = [min(x), max(x)]
         y_extrema = None
         for ydata in y:
@@ -46,7 +46,7 @@ class Plot():
         for i, y_data in enumerate(y):
             plotcolor = colors[i % 2]
             pylab.plot(x, y_data, plotcolor)
-        pylab.xticks(x, labels, rotation='vertical')
+        pylab.xticks(x, labels, rotation=45)
         #pylab.legend(('Low', 'High'))
         file_name = ''.join([str(self._get_counter()), '.png'])
         file_path = os.path.join(path, file_name)
