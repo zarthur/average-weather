@@ -60,21 +60,26 @@ class AverageWeather(object):
 
         cites = [x['cite'] for x in results]
         services = [x['source'] for x in results]
-        current = [x['data'].pop('current') for x in results]
+        current = [x['data'].pop('current', None) for x in results]
         forecast = [x['data'] for x in results]
 
         lows, highs = [], []
+
+        dates = []
         days = []
-        for source in forecast:
-            days = list(source.keys()) if len(source.keys()) > len(days) \
-                    else days
-        for day in days:
+        for i, source in enumerate(forecast):
+            for key in source.keys():
+                if key not in dates:
+                    dates.append(key)
+                    days.append(source[key]['day'])
+
+        for date in dates:
             low_list = []
             high_list = []
             for source in forecast:
-                if day in source:
-                    low_list.append(source[day]['low'])
-                    high_list.append(source[day]['high'])
+                if date in source:
+                    low_list.append(source[date]['low'])
+                    high_list.append(source[date]['high'])
             lows.append(low_list)
             highs.append(high_list)
 
@@ -84,10 +89,10 @@ class AverageWeather(object):
         plotfile = self.plotter.makeplot('./templates/public/plots', winwidth,
                                          days, mean_lows, mean_highs)
 
-        return render('summary.html', zip_code=zip_code, services=services,
-                      days=days, forecast=forecast, current=current,
-                      mean_lows=mean_lows, mean_highs=mean_highs,
-                      plotfile=plotfile, cites=cites)
+        return render('summary.html', cites=cites, current=current, dates=dates,
+                      days=days, forecast=forecast,  mean_highs=mean_highs,
+                      mean_lows=mean_lows, plotfile=plotfile,
+                      services=services, zip_code=zip_code)
 
 
 def main():

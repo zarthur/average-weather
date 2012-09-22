@@ -46,7 +46,7 @@ class Plot():
         for i, y_data in enumerate(y):
             plotcolor = colors[i % 2]
             pylab.plot(x, y_data, plotcolor)
-        pylab.xticks(x, labels)
+        pylab.xticks(x, labels, rotation='vertical')
         #pylab.legend(('Low', 'High'))
         file_name = ''.join([str(self._get_counter()), '.png'])
         file_path = os.path.join(path, file_name)

@@ -20,50 +20,54 @@
                     <div data-role="collapsible" data-collapsed="true">
                         <h3>
                             <%
-                                current_temp = [float(x['temp']) for x in current]
+                                current_temp = [float(x['temp']) for x in current if x]
                                 current_temp = sum(current_temp)/len(current_temp)
                             %>
                             <b>CURRENT</b> ${int(current_temp)}
                         </h3>
 
                         % for i, entry in enumerate(current):
-                                <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
-                                    <div data-role="collapsible" data-collapsed="true">
-                                        <h3>
-                                            <b>${services[i].capitalize()}</b>
-                                        </h3>
-                                        <table border="0" width="100%"><tr><td><div>
-                                            <table border="0" width="100%">
-                                                <tr><td>
-                                                    <div><b>Temperature</b> ${entry['temp']}</div>
-                                                    % if 'humidity' in entry:
-                                                        <div><b>Humidity</b> ${entry['humidity']}</div>
-                                                    % endif
-                                                    % if 'wind' in entry:
-                                                        <div><b>Wind</b> ${entry['wind']}</div>
-                                                    % endif
-                                                    <div><b>Condition</b> ${entry['condition']}</div>
-                                                </td><td align="right" width="35px">
-                                                    % if 'icon' in entry:
-                                                        <img src=${entry['icon']}>
-                                                    % endif
-                                                </td></tr>
-                                            </table>
-                                        </div></td></tr></table>
-                                    </div>
+                            <%
+                                if not entry:
+                                    continue
+                            %>
+                            <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
+                                <div data-role="collapsible" data-collapsed="true">
+                                    <h3>
+                                        <b>${services[i].capitalize()}</b>
+                                    </h3>
+                                    <table border="0" width="100%"><tr><td><div>
+                                        <table border="0" width="100%">
+                                            <tr><td>
+                                                <div><b>Temperature</b> ${entry['temp']}</div>
+                                                % if 'humidity' in entry:
+                                                    <div><b>Humidity</b> ${entry['humidity']}</div>
+                                                % endif
+                                                % if 'wind' in entry:
+                                                    <div><b>Wind</b> ${entry['wind']}</div>
+                                                % endif
+                                                <div><b>Condition</b> ${entry['condition']}</div>
+                                            </td><td align="right" width="35px">
+                                                % if 'icon' in entry:
+                                                    <img src=${entry['icon']}>
+                                                % endif
+                                            </td></tr>
+                                        </table>
+                                    </div></td></tr></table>
                                 </div>
+                            </div>
                         % endfor
                     </div>
                 </div>
-                % for day_idx, day in enumerate(days):
+                % for date_idx, date in enumerate(dates):
                     <div data-role="collapsible-set" data-theme="b" data-content-theme="">
                         <div data-role="collapsible" data-collapsed="true">
                             <h3>
-                                <b>${day.upper()}</b> High: ${int(mean_highs[day_idx])} Low: ${int(mean_lows[day_idx])}
+                                <b>${days[date_idx].upper()}</b> High: ${int(mean_highs[date_idx])} Low: ${int(mean_lows[date_idx])}
                             </h3>
 
                             % for entry_idx, entry in enumerate(forecast):
-                                %if day in entry:
+                                %if date in entry:
                                     <div data-role="collapsible-set" data-theme="c" data-content-theme="c">
                                         <div data-role="collapsible" data-collapsed="true">
                                             <h3>
@@ -71,18 +75,18 @@
                                             </h3>
                                             <table border="0" width="100%"><tr><td>
                                                 <div>
-                                                    <b>High</b> ${entry[day]['high']}
+                                                    <b>High</b> ${entry[date]['high']}
                                                 </div>
                                                 <div>
-                                                    <b>Low</b> ${entry[day]['low']}
+                                                    <b>Low</b> ${entry[date]['low']}
                                                 </div>
                                                 <div>
-                                                    <b>Condition</b> ${entry[day]['condition']}
+                                                    <b>Condition</b> ${entry[date]['condition']}
                                                 </div>
                                             </td>
                                             <td align="right" width="35px">
-                                                % if 'icon' in entry[day]:
-                                                    <img src=${entry[day]['icon']}>
+                                                % if 'icon' in entry[date]:
+                                                    <img src=${entry[date]['icon']}>
                                                 % endif
                                             </td></tr></table>
                                         </div>
@@ -92,13 +96,19 @@
                         </div>
                     </div>
                 % endfor
-            </div>
-            <div name="citations">
-                Sources:
-                <ul>
-                % for cite in cites:
-                    <li><a href=${cite['url']}>${cite['text']}</a></li>
-                % endfor
+                <ul data-role="listview" data-divider-theme="c" data-inset="true">
+                    <li data-role="list-divider" role="heading">
+                        Sources
+                    </li>
+                    % for cite in cites:
+                        <li data-theme="c">
+                            <a href=${cite['url']} data-transition="slide">
+                                    <p style="white-space:normal">
+                                            ${cite['text']}
+                                    </p>
+                            </a>
+                        </li>
+                    % endfor
                 </ul>
             </div>
             <%include file='body_foot.html'/>
